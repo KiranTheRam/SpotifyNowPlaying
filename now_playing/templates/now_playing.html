@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Now Playing</title>
+{#    <meta http-equiv="refresh" content="5">#}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f1f1f1; /* Default background color */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .song-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 60px; /* Space between album art and song info */
+        }
+
+        .album-art {
+            margin-right: 60px; /* Space between album art and song info */
+        }
+
+        .info {
+            text-align: left;
+        }
+
+        .info h1 {
+            font-size: 60px;
+            margin: 0;
+        }
+
+        .info h2 {
+            font-size: 35px;
+            font-style: italic;
+            margin: 0;
+        }
+    </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Function to update specific elements on the page
+            function updatePageElements() {
+                $.ajax({
+                    url: '/update/',  // URL of the Django view that returns the updated data
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // Update specific elements on the page with the new data
+                        $('#album-art-image').attr('src', data.album_art_url);
+                        $('#track-name').text(data.track_name);
+                        $('#artist-name').text(data.artist_name);
+                        // Update more elements as needed
+                    }
+                });
+            }
+
+            // Call the function initially when the page loads
+            updatePageElements();
+
+            // Call the function every 5 seconds (adjust the interval as needed)
+            setInterval(updatePageElements, 2000);
+        });
+
+        function setBodyBackgroundColor() {
+            var albumArtImage = document.getElementById('album-art-image');
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+
+            albumArtImage.crossOrigin = "Anonymous"; // Enable CORS for the image
+
+            albumArtImage.addEventListener('load', function() {
+                context.drawImage(albumArtImage, 0, 0, 1, 1);
+                var pixelData = context.getImageData(0, 0, 1, 1).data;
+                var rgbColor = 'rgb(' + pixelData[0] + ', ' + pixelData[1] + ', ' + pixelData[2] + ')';
+                document.body.style.backgroundColor = rgbColor;
+            });
+
+            albumArtImage.src = albumArtImage.src; // Trigger the load event
+        }
+    </script>
+</head>
+<body onload="setBodyBackgroundColor()">
+    <div class="container">
+        <div class="song-info">
+            <div class="album-art">
+                {% if album_art_url %}
+                    <img src="{{ album_art_url }}" alt="Album Art" id="album-art-image">
+                {% endif %}
+            </div>
+            <div class="info">
+                <h1 id="track-name">{{ track_name }}</h1>
+                <h2 id="artist-name">{{ artist_name }}</h2>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
