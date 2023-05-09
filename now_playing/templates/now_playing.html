@@ -6,7 +6,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f1f1f1; /* Default background color */
+            background-color: #141414; /* Default background color */
             overflow-y: hidden; /* Remove vertical scrollbar */
         }
 
@@ -44,6 +44,15 @@
             margin: 0;
         }
 
+        .no-music {
+            font-size: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Equal space from the top and bottom */
+            color: #ebebeb;
+        }
+
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
@@ -55,11 +64,17 @@
                     method: 'GET',
                     dataType: 'json',
                     success: function (data) {
-                        // Update specific elements on the page with the new data
-                        $('#album-art-image').attr('src', data.album_art_url);
-                        $('#track-name').text(data.track_name);
-                        $('#artist-name').text(data.artist_name);
-                        // Update more elements as needed
+                        if (data.track_name) {
+                            // Update specific elements on the page with the new data
+                            $('#album-art-image').attr('src', data.album_art_url);
+                            $('#track-name').text(data.track_name);
+                            $('#artist-name').text(data.artist_name);
+                            $('.container').show();
+                            $('.no-music').hide(); // Hide the "No music playing" text
+                        } else {
+                            $('.no-music').show(); // Show the "No music playing" text
+                            $('.container').hide();
+                        }
                     }
                 });
             }
@@ -113,6 +128,10 @@
             <h2 id="artist-name">{{ artist_name }}</h2>
         </div>
     </div>
+</div>
+
+<div class="no-music">
+    <h1>No Music Playing</h1>
 </div>
 </body>
 </html>
