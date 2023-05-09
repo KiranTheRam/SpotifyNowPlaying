@@ -2,32 +2,31 @@
 <html>
 <head>
     <title>Now Playing</title>
-{#    <meta http-equiv="refresh" content="5">#}
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             background-color: #f1f1f1; /* Default background color */
+            overflow-y: hidden; /* Remove vertical scrollbar */
         }
 
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            padding: 20px;
+            justify-content: space-between;
+            min-height: 100vh;
         }
 
         .song-info {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 60px; /* Space between album art and song info */
+            height: 100vh; /* Equal space from the top and bottom */
         }
 
         .album-art {
-            margin-right: 60px; /* Space between album art and song info */
+            margin-right: 65px; /* Space between album art and song info */
         }
 
         .info {
@@ -44,17 +43,18 @@
             font-style: italic;
             margin: 0;
         }
+
     </style>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Function to update specific elements on the page
             function updatePageElements() {
                 $.ajax({
                     url: '/update/',  // URL of the Django view that returns the updated data
                     method: 'GET',
                     dataType: 'json',
-                    success: function(data) {
+                    success: function (data) {
                         // Update specific elements on the page with the new data
                         $('#album-art-image').attr('src', data.album_art_url);
                         $('#track-name').text(data.track_name);
@@ -67,8 +67,8 @@
             // Call the function initially when the page loads
             updatePageElements();
 
-            // Call the function every 5 seconds (adjust the interval as needed)
-            setInterval(updatePageElements, 2000);
+            // Call the function every 1 seconds (adjust the interval as needed)
+            setInterval(updatePageElements, 1000);
         });
 
         function setBodyBackgroundColor() {
@@ -78,11 +78,22 @@
 
             albumArtImage.crossOrigin = "Anonymous"; // Enable CORS for the image
 
-            albumArtImage.addEventListener('load', function() {
+            albumArtImage.addEventListener('load', function () {
                 context.drawImage(albumArtImage, 0, 0, 1, 1);
                 var pixelData = context.getImageData(0, 0, 1, 1).data;
                 var rgbColor = 'rgb(' + pixelData[0] + ', ' + pixelData[1] + ', ' + pixelData[2] + ')';
                 document.body.style.backgroundColor = rgbColor;
+
+                // Determine the luminance value of the background color
+                var luminance = (0.299 * pixelData[0] + 0.587 * pixelData[1] + 0.114 * pixelData[2]) / 255;
+                // Change the text color based on the background luminance
+                if (luminance > 0.5) {
+                    document.getElementById('track-name').style.color = '#000000'; // Black text
+                    document.getElementById('artist-name').style.color = '#000000'; // Black text
+                } else {
+                    document.getElementById('track-name').style.color = '#ffffff'; // White text
+                    document.getElementById('artist-name').style.color = '#ffffff'; // White text
+                }
             });
 
             albumArtImage.src = albumArtImage.src; // Trigger the load event
@@ -90,18 +101,18 @@
     </script>
 </head>
 <body onload="setBodyBackgroundColor()">
-    <div class="container">
-        <div class="song-info">
-            <div class="album-art">
-                {% if album_art_url %}
-                    <img src="{{ album_art_url }}" alt="Album Art" id="album-art-image">
-                {% endif %}
-            </div>
-            <div class="info">
-                <h1 id="track-name">{{ track_name }}</h1>
-                <h2 id="artist-name">{{ artist_name }}</h2>
-            </div>
+<div class="container">
+    <div class="song-info">
+        <div class="album-art">
+            {% if album_art_url %}
+                <img src="{{ album_art_url }}" alt="Album Art" id="album-art-image">
+            {% endif %}
+        </div>
+        <div class="info">
+            <h1 id="track-name">{{ track_name }}</h1>
+            <h2 id="artist-name">{{ artist_name }}</h2>
         </div>
     </div>
+</div>
 </body>
 </html>
